@@ -3,16 +3,20 @@
 #ifndef _ENCODE_H_
 #define _ENCODE_H_
 
-int decodeString(char name[8] , int* ret);
+int decodeName(const char name[8] , int* ret);
 
-int encodeString(int* dec , char* name);
+int encodeName(int* dec , char* name);
 
-int decodeInt8(int8_t n , int* ret);
+int decodeCase(int n , int* ret);
 
-int8_t encodeInt8(int* dec);
+int encodeCase(int* dec);
 
-int decodeInt32(int32_t n , int* ret);
+int decodeLocation(int n , int* ret);
 
-int32_t encodeInt32(int* dec);
+int encodeLocation(int* dec);
+
+int decodeTime(int n , int* ret);
+
+int encodeTime(int* dec);
 
 #endif

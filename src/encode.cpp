@@ -1,39 +1,70 @@
 #include "encode.h"
 #include <stdio.h>
 
-int decodeString(char name[8] , int* ret)
+int decodeName(const char name[8] , int* ret)
 {
 	for(int i = 0 ; i < 8 ; i++)
 	{
 		int temp = 1;
-		for(int j = 0 ; j < 8 ; j++)
+		// printf("%d\n" , (name[i] | ' ') - 'a' + 1);
+		for(int j = 0 ; j < 5 ; j++)
 		{
-			ret[i * 8 + 7 - j] = (name[i] & temp) / temp;
+			ret[i * 5 + 4 - j] = ((name[i] | ' ') & temp) / temp;
 			temp <<= 1;
 		}
 	}
 	return 0;
 }
 
-int encodeString(int* dec , char* name)
+int encodeName(int* dec , char* name)
 {
 	for(int i = 0 ; i < 8 ; i++)
 	{
-		char temp = dec[i * 8];
-		for(int j = 1 ; j < 8 ; j++)
+		char temp = dec[i * 5];
+		for(int j = 1 ; j < 5 ; j++)
 		{
 			temp <<= 1;
-			temp += dec[i * 8 + j];
+			temp += dec[i * 5 + j];
 			// printf("%d\n" , temp);
 		}
-		name[i] = temp;
+		if(temp)
+		{
+			name[i] = temp | 96;
+		}
+		else
+		{
+			name[i] = temp;
+		}
+	}
+	name[0] = name[0] ^ 32;
+	return 0;
+}
+
+int decodeCase(int n , int* ret)
+{
+	int temp = 1;
+	for(int i = 0 ; i < 3 ; i++)
+	{
+		ret[2 - i] = (n & temp) / temp;
+		temp <<= 1;
 	}
 	return 0;
 }
 
-int decodeInt8(int8_t n , int* ret)
+int encodeCase(int* dec)
 {
-	int8_t temp = 1;
+	int temp = dec[0];
+	for(int i = 1 ; i < 3 ; i++)
+	{
+		temp <<= 1;
+		temp += dec[i];
+	}
+	return temp;
+}
+
+int decodeLocation(int n , int* ret)
+{
+	int temp = 1;
 	for(int i = 0 ; i < 8 ; i++)
 	{
 		ret[7 - i] = (n & temp) / temp;
@@ -42,9 +73,9 @@ int decodeInt8(int8_t n , int* ret)
 	return 0;
 }
 
-int8_t encodeInt8(int* dec)
+int encodeLocation(int* dec)
 {
-	int8_t temp = dec[0];
+	int temp = dec[0];
 	for(int i = 1 ; i < 8 ; i++)
 	{
 		temp <<= 1;
@@ -53,24 +84,60 @@ int8_t encodeInt8(int* dec)
 	return temp;
 }
 
-int decodeInt32(int32_t n , int* ret)
+int decodeTime(int n , int* ret)
 {
-	int32_t temp = 1;
-	for(int i = 0 ; i < 32 ; i++)
+	int year = 2023 - n / 10000;
+	int month = (n / 100) % 100;
+	int day = n % 100;
+	// printf("%d , %d , %d\n" , year , month , day);
+	int temp = 1;
+	//year
+	for(int i = 0 ; i < 4 ; i++)
 	{
-		ret[31 - i] = (n & temp) / temp;
+		ret[3 - i] = (year & temp) / temp;
+		temp <<= 1;
+	}
+	//month
+	temp = 1;
+	for(int i = 0 ; i < 4 ; i++)
+	{
+		ret[7 - i] = (month & temp) / temp;
+		temp <<= 1;
+	}
+	//day
+	temp = 1;
+	for(int i = 0 ; i < 5 ; i++)
+	{
+		ret[12 - i] = (day & temp) / temp;
 		temp <<= 1;
 	}
 	return 0;
 }
 
-int32_t encodeInt32(int* dec)
+int encodeTime(int* dec)
 {
-	int32_t temp = dec[0];
-	for(int i = 1 ; i < 32 ; i++)
+	//year
+	int year = dec[0];
+	for(int i = 1 ; i < 4 ; i++)
 	{
-		temp <<= 1;
-		temp += dec[i];
+		year <<= 1;
+		year += dec[i];
 	}
-	return temp;
+	year = 2023 - year;
+	//month
+	int month = dec[4];
+	for(int i = 5 ; i < 8 ; i++)
+	{
+		month <<= 1;
+		month += dec[i];
+	}
+	//day
+	int day = dec[8];
+	for(int i = 9 ; i < 13 ; i++)
+	{
+		day <<= 1;
+		day += dec[i];
+	}
+	int ret = year * 10000 + month * 100 + day;
+	return ret;
 }
