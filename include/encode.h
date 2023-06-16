@@ -3,7 +3,7 @@
 #ifndef _ENCODE_H_
 #define _ENCODE_H_
 
-int decodeName(const char name[8] , int* ret);
+int decodeName(const char* name , int* ret);
 
 int encodeName(int* dec , char* name);
 

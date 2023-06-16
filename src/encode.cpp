@@ -1,7 +1,7 @@
 #include "encode.h"
 #include <stdio.h>
 
-int decodeName(const char name[8] , int* ret)
+int decodeName(const char* name , int* ret)
 {
 	for(int i = 0 ; i < 8 ; i++)
 	{
