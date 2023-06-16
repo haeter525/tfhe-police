@@ -1,18 +1,16 @@
 #include "data.h"
 #include "encode.h"
-#include <cstring>
 #include <future>
 #include "str_cmp.h"
 
 #define DEBUG 0
 
-DataBase::DataBase(const char* dirName , int threads)
+DataBase::DataBase(const char* dirName)
 {
 	__dirName = std::string(dirName);
-	__threads = threads;
 }
 
-int DataBase::fetch(lbcrypto::LWEPrivateKey sk, lbcrypto::BinFHEContext cc)
+int DataBase::fetch()
 {
 	char* fileName = NULL;
 	asprintf(&fileName , "%s/length" , __dirName.c_str());
@@ -22,27 +20,32 @@ int DataBase::fetch(lbcrypto::LWEPrivateKey sk, lbcrypto::BinFHEContext cc)
 	for(int i = 0 ; i < length ; i++)
 	{
 		dataCipher_ temp;
-		for(int j = 0 ; j < 64 ; j++)
+		for(int j = 0 ; j < 40 ; j++)
 		{
 			asprintf(&fileName , "encData/%dN%02d" , i , j);
-			lbcrypto::Serial::DeserializeFromFile(fileName , temp.nameCipher[j / 8][j % 8] , lbcrypto::SerType::BINARY);
+			lbcrypto::Serial::DeserializeFromFile(fileName , temp.nameCipher[j / 5][j % 5] , lbcrypto::SerType::BINARY);
 		}
-		for(int j = 0 ; j < 8 ; j++)
+		for(int j = 0 ; j < 3 ; j++)
 		{
 			asprintf(&fileName , "encData/%dC%02d" , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.caseCipher[j] , lbcrypto::SerType::BINARY);
 		}	
-		for(int j = 0 ; j < 32 ; j++)
+		for(int j = 0 ; j < 13 ; j++)
 		{
 			asprintf(&fileName , "encData/%dT%02d" , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.timeCipher[j] , lbcrypto::SerType::BINARY);
+		}
+		for(int j = 0 ; j < 8 ; j++)
+		{
+			asprintf(&fileName , "encData/%dL%02d" , i , j);
+			lbcrypto::Serial::DeserializeFromFile(fileName , temp.locationCipher[j] , lbcrypto::SerType::BINARY);
 		}
 		__dataCipher.push_back(temp);
 	}
     return 0;
 }
 
-int DataBase::encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , const char* fileName)
+int encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , const char* fileName , const char* dirName)
 {
 	std::vector <data_> data;
 	FILE* fptr = fopen(fileName , "r");
@@ -54,12 +57,16 @@ int DataBase::encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , 
 	for(int i = 0 , c = 0 ; (c = fgetc(fptr)) != EOF ; i++)
 	{
 		data_ temp;
+		for(int j = 0 ; j < 9 ; j++)
+		{
+			temp.name[j] = 0;
+		}
 		for(int j = 0 ; c != ',' ; j++)
 		{
 			temp.name[j] = c;
 			c = fgetc(fptr);
 		}
-		fscanf(fptr , "%hhd,%d\n" , &(temp.caseNum) , &(temp.time));
+		fscanf(fptr , "%d,%d,%d\n" , &(temp.caseNum) , &(temp.location) , &(temp.time));
 		data.push_back(temp);
 	}
 
@@ -69,65 +76,77 @@ int DataBase::encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , 
 
 	for(auto i = data.begin() ; i != data.end() ; i++)
 	{
-		char temp[9] = {0};
-		strncpy(temp , i -> name , 8);
-		std::cout << temp << "\t" << int(i -> caseNum) << "\t" << i -> time << "\n";
+		std::cout << i -> name << "\t";
+		std::cout << i -> caseNum << "  ";
+		std::cout << i -> location << "\t";
+		std::cout << i -> time << "\n";
 	}
 
 	#endif
 
 	cc.BTKeyGen(sk);
-
-	system("mkdir encData");
-
-	fptr = fopen("lengh" , "wb");
-
+	char* temp;
+	asprintf(&temp , "mkdir %s" , dirName);
+	system(temp);
+	asprintf(&temp , "%s/length" , dirName);
+	fptr = fopen(temp , "wb");
 	fprintf(fptr , "%zu" , data.size());
-
 	fclose(fptr);
 
+	int thread = 16;
 	std::vector <std::future <bool>> threads;
-	// std::cout << data.size() << "\n";
+	int blockSize = (data.size() - 1) / thread + 1;
 
-	int blockSize = (data.size() - 1) / __threads;
+	#if DEBUG
 
 	std::cout << "Data size : " << data.size() << "\n";
 	std::cout << "Block size : " << blockSize << "\n";
 
-	for(int i = 0 ; i < __threads ; i++)
+	#endif
+
+	for(int i = 0 ; i < thread ; i++)
 	{
 		threads.push_back(std::async([&](int i)
 		{
 			lbcrypto::LWECiphertext tempCipher;
 			char* filename = NULL;
-			int decTime[32] = {0};
-			int decCase[8] = {0};
-			int decName[64] = {0};
-			decodeString(data[i].name , decName);
+			int decTime[13] = {0};
+			int decCase[3] = {0};
+			int decName[40] = {0};
+			int decLocation[8] = {0};
 			for(int b = 0 ; b < blockSize ; b++)
 			{
 				if(b + i * blockSize >= data.size())
 				{
 					break;
 				}
-				for(int j = 0 ; j < 64 ; j++)
+				// std::cout << b + i * blockSize << " ";
+				decodeName(data[b + i * blockSize].name , decName);
+				for(int j = 0 ; j < 40 ; j++)
 				{
-					asprintf(&filename , "%s/%dN%02d" , __dirName.c_str() , b + i * blockSize , j);
+					asprintf(&filename , "%s/%dN%02d" , dirName , b + i * blockSize , j);
 					tempCipher = cc.Encrypt(sk , decName[j]);
 					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
 				}
-				decodeInt8(data[i].caseNum , decCase);
-				for(int j = 0 ; j < 8 ; j++)
+				decodeCase(data[b + i * blockSize].caseNum , decCase);
+				for(int j = 0 ; j < 3 ; j++)
 				{
-					asprintf(&filename , "%s/%dC%02d" , __dirName.c_str() , b + i * blockSize , j);
+					asprintf(&filename , "%s/%dC%02d" , dirName , b + i * blockSize , j);
 					tempCipher = cc.Encrypt(sk , decCase[j]);
 					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
 				}
-				decodeInt32(data[i].time , decTime);
-				for(int j = 0 ; j < 32 ; j++)
+				decodeTime(data[b + i * blockSize].time , decTime);
+				for(int j = 0 ; j < 13 ; j++)
 				{
-					asprintf(&filename , "%s/%dT%02d" , __dirName.c_str() , b + i * blockSize , j);
+					asprintf(&filename , "%s/%dT%02d" , dirName , b + i * blockSize , j);
 					tempCipher = cc.Encrypt(sk , decTime[j]);
+					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
+				}
+				decodeLocation(data[b + i * blockSize].location , decLocation);
+				for(int j = 0 ; j < 8 ; j++)
+				{
+					asprintf(&filename , "%s/%dL%02d" , dirName , b + i * blockSize , j);
+					tempCipher = cc.Encrypt(sk , decLocation[j]);
 					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
 				}
 			}
@@ -142,6 +161,13 @@ int DataBase::encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , 
 
 	return 0;
 }
+
+std::vector <dataCipher_> DataBase::get()
+{
+	return __dataCipher;
+}
+
+#if 0
 
 int DataBase::query(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , const char* dirName)
 {
@@ -253,3 +279,5 @@ int DataBase::query(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , co
 
 	return 0;
 }
+
+#endif
