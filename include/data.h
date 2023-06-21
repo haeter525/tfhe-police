@@ -34,6 +34,4 @@ class DataBase
 		//int query(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , const char* dirName);
 };
 
-int encrypt(lbcrypto::LWEPrivateKey sk , lbcrypto::BinFHEContext cc , const char* fileName , const char* dirName);
-
 #endif
