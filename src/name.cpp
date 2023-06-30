@@ -10,7 +10,7 @@ int encryptName(char* name)
 	char temp[8] = {0};
 	strncpy(temp , name , 8);
 	int* pDName = (int*)calloc(40 , sizeof(int));
-	decodeString(temp , pDName);
+	decodeName(temp , pDName);
 	std::cout << "Fetching key and cryptoContext ...\n";
 	lbcrypto::LWEPrivateKey SecretKey;
 	lbcrypto::BinFHEContext CryptoContext;
@@ -32,8 +32,7 @@ int encryptName(char* name)
 	for(int i = 0 ; i < 40 ; i++)
 	{
 		DName[i] = CryptoContext.Encrypt(SecretKey , pDName[i]);
-		fname = (char*)calloc(10, sizeof(char));
-		sprintf(fname , "cts/temp%d" , i);
+		asprintf(&fname , "cts/temp%d" , i);
 		lbcrypto::Serial::SerializeToFile(fname , DName[i] , lbcrypto::SerType::BINARY);
 	}
 	system("zip -r cts cts");
