@@ -37,7 +37,7 @@
 #include "str_cmp.h"
 
 using namespace lbcrypto;
-LWECiphertext byte_comp(LWECiphertext b1[8], LWECiphertext b2[8], ConstLWEPrivateKey sk, BinFHEContext cc){
+LWECiphertext byte_comp(LWECiphertext b1[5], LWECiphertext b2[5], ConstLWEPrivateKey sk, BinFHEContext cc){
 	auto check = cc.Encrypt(sk, 1);
 	for(int i = 0 ;i < 5; i++){
 		auto temp = cc.EvalBinGate(XNOR, b1[i], b2[i]);
