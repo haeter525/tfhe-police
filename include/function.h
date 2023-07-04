@@ -8,11 +8,9 @@ struct nameCipher {
 int fetchName(nameCipher* myCipher);
 int encryptName (char *name);
 int query();
-void help();
 int keygen();
 int encrypt(const char* dirName);
 int decrypt(const char* dirName);
 int add();
-int addData();
 
 #endif
