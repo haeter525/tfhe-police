@@ -13,5 +13,6 @@ int keygen();
 int encrypt(const char* dirName);
 int decrypt(const char* dirName);
 int add();
+int addData();
 
 #endif

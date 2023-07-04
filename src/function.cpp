@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <stdlib.h>
+#include <stdio.h>
 #include <future>
 #include "binfhecontext-ser.h"
 #include "function.h"
@@ -78,7 +79,7 @@ int query(){
 	char* filename; 
 	
 	lbcrypto::LWEPrivateKey secretKey;
-        lbcrypto::BinFHEContext cryptoContext;
+		lbcrypto::BinFHEContext cryptoContext;
 	lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
 	lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
 	cryptoContext.BTKeyGen(secretKey);
@@ -99,15 +100,15 @@ int query(){
 	int thread = 8;
 	std::vector <std::future <bool>> threads;
 	int blockSize = (num - 1) / thread + 1;
-        lbcrypto::LWECiphertext cmpResult;
-        lbcrypto::LWECiphertext count;
+		lbcrypto::LWECiphertext cmpResult;
+		lbcrypto::LWECiphertext count;
 	
 	
 	
-        puts("start string comparing....");
-        system("mkdir cmpResults");
-        system("mkdir evalData");
-      	
+		puts("start string comparing....");
+		system("mkdir cmpResults");
+		system("mkdir evalData");
+	  	
 
 
 	for(int row = 0 ; row < thread ; row++)
@@ -120,16 +121,16 @@ int query(){
 				}
 				auto cmpResult = str_comp(tempdata[b + row * blockSize].nameCipher , qNameCipher , secretKey , cryptoContext);
 			
-                		asprintf(&filename , "cmpResults/%d-cmpResult" , b + row * blockSize);
-                		lbcrypto::Serial::SerializeToFile(filename , cmpResult , lbcrypto::SerType::BINARY);
+						asprintf(&filename , "cmpResults/%d-cmpResult" , b + row * blockSize);
+						lbcrypto::Serial::SerializeToFile(filename , cmpResult , lbcrypto::SerType::BINARY);
 				for(int byte = 0 ; byte < 8 ; byte++)	
 				{
 					for(int bit = 0 ; bit < 5 ; bit++)
 					{
 						tempNameCipher[b + row * blockSize][byte][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].nameCipher[byte][bit]);
 			
-                		                asprintf(&filename , "evalData/%d-name-%d-%d" ,b + row * blockSize, byte, bit);
-                		                lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
+										asprintf(&filename , "evalData/%d-name-%d-%d" ,b + row * blockSize, byte, bit);
+										lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
 						
 					}
 				}
@@ -137,25 +138,25 @@ int query(){
 				{
 					tempCaseCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].caseCipher[bit]);
 		
-                		        asprintf(&filename , "evalData/%d-case-%d" , b + row * blockSize, bit);
-                		        lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
+								asprintf(&filename , "evalData/%d-case-%d" , b + row * blockSize, bit);
+								lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
 				
 				}
 				for(int bit = 0 ; bit < 8 ; bit++)
 				{
 					tempLocCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].locationCipher[bit]);
 		
-        		                asprintf(&filename , "evalData/%d-location-%d" , b + row * blockSize, bit);
-        		                lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
+								asprintf(&filename , "evalData/%d-location-%d" , b + row * blockSize, bit);
+								lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 					
 				}
 				for(int bit = 0 ; bit < 13 ; bit++)
 				{
 					tempTimeCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].timeCipher[bit]);
 		
-        		                asprintf(&filename , "evalData/%d-time-%d" ,b + row * blockSize, bit);
-        		                lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
-        		                
+								asprintf(&filename , "evalData/%d-time-%d" ,b + row * blockSize, bit);
+								lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
+								
 				}
 			}
 			return true;
@@ -163,8 +164,8 @@ int query(){
 	}
 
 	for(int row = 0; row < thread; ++row) {
-                threads[row].get();
-        }
+				threads[row].get();
+		}
 	return 0;
 }
 
@@ -275,7 +276,7 @@ int encrypt(const char* dirName)
 			int decLocation[8] = {0};
 			for(int b = 0 ; b < blockSize ; b++)
 			{
-                int now = b + i * blockSize;
+				int now = b + i * blockSize;
 				if(now >= data.size())
 				{
 					break;
@@ -323,11 +324,171 @@ int encrypt(const char* dirName)
 
 int decrypt(const char* dirName)
 {
-    return 0;
+	return 0;
 }
 
 int add()
 {
-    
-    return 0;
+	int length = 0;
+	FILE* fptr = fopen("encData/length" , "r");
+	fscanf(fptr , "%d" , &length);
+	fclose(fptr);
+	system("unzip cts.zip");
+	int add = 0;
+	fptr = fopen("cts/length" , "r");
+	fscanf(fptr , "%d" , &add);
+	fclose(fptr);
+	char* command;
+	
+	for(int i = 0 ; i < add ; i++)
+	{
+		for(int j = 0 ; j < 40 ; j++)
+		{
+			asprintf(&command , "cp cts/%dN%02d encData/%dN%02d" , i , j , length + i , j);
+			system(command);
+		}
+		for(int j = 0 ; j < 3 ; j++)
+		{
+			asprintf(&command , "cp cts/%dC%02d encData/%dC%02d" , i , j , length + i , j);
+			system(command);
+		}
+		for(int j = 0 ; j < 13 ; j++)
+		{
+			asprintf(&command , "cp cts/%dT%02d encData/%dT%02d" , i , j , length + i , j);
+			system(command);
+		}
+		for(int j = 0 ; j < 8 ; j++)
+		{
+			asprintf(&command , "cp cts/%dL%02d encData/%dL%02d" , i , j , length + i , j);
+			system(command);
+		}
+	}
+	system("rm -f -R cts");
+	free(command);
+	return 0;
+}
+
+int addData()
+{
+	lbcrypto::LWEPrivateKey sk;
+	lbcrypto::BinFHEContext cc;
+	lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
+	std::vector <data_> data;
+	FILE* fptr = fopen("data.csv" , "r");
+	if(fptr == nullptr)
+	{
+		std::cout << "Error when open file " << "data.csv" << "\n";
+		return 0;
+	}
+	for(int i = 0 , c = 0 ; (c = fgetc(fptr)) != EOF ; i++)
+	{
+		data_ temp;
+		for(int j = 0 ; j < 9 ; j++)
+		{
+			temp.name[j] = 0;
+		}
+		for(int j = 0 ; c != ',' ; j++)
+		{
+			temp.name[j] = c;
+			c = fgetc(fptr);
+		}
+		fscanf(fptr , "%d,%d,%d\n" , &(temp.caseNum) , &(temp.location) , &(temp.time));
+		data.push_back(temp);
+	}
+
+	fclose(fptr);
+
+	#if DEBUG
+
+	for(auto i = data.begin() ; i != data.end() ; i++)
+	{
+		std::cout << i -> name << "\t";
+		std::cout << i -> caseNum << "  ";
+		std::cout << i -> location << "\t";
+		std::cout << i -> time << "\n";
+	}
+
+	#endif
+
+	cc.BTKeyGen(sk);
+	char* temp;
+	char* dirName = "cts";
+	asprintf(&temp , "mkdir %s" , dirName);
+	system(temp);
+	asprintf(&temp , "%s/length" , dirName);
+	fptr = fopen(temp , "w");
+	fprintf(fptr , "%zu" , data.size());
+	fclose(fptr);
+
+	int thread = 16;
+	std::vector <std::future <bool>> threads;
+	int blockSize = (data.size() - 1) / thread + 1;
+
+	#if DEBUG
+
+	std::cout << "Data size : " << data.size() << "\n";
+	std::cout << "Block size : " << blockSize << "\n";
+
+	#endif
+
+	for(int i = 0 ; i < thread ; i++)
+	{
+		threads.push_back(std::async([&](int i)
+		{
+			lbcrypto::LWECiphertext tempCipher;
+			char* filename = NULL;
+			int decTime[13] = {0};
+			int decCase[3] = {0};
+			int decName[40] = {0};
+			int decLocation[8] = {0};
+			for(int b = 0 ; b < blockSize ; b++)
+			{
+				int now = b + i * blockSize;
+				if(now >= data.size())
+				{
+					break;
+				}
+				decodeName(data[now].name , decName);
+				for(int j = 0 ; j < 40 ; j++)
+				{
+					asprintf(&filename , "%s/%dN%02d" , dirName , now , j);
+					tempCipher = cc.Encrypt(sk , decName[j]);
+					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
+				}
+				decodeCase(data[now].caseNum , decCase);
+				for(int j = 0 ; j < 3 ; j++)
+				{
+					asprintf(&filename , "%s/%dC%02d" , dirName , now , j);
+					tempCipher = cc.Encrypt(sk , decCase[j]);
+					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
+				}
+				decodeTime(data[now].time , decTime);
+				for(int j = 0 ; j < 13 ; j++)
+				{
+					asprintf(&filename , "%s/%dT%02d" , dirName , now , j);
+					tempCipher = cc.Encrypt(sk , decTime[j]);
+					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
+				}
+				decodeLocation(data[now].location , decLocation);
+				for(int j = 0 ; j < 8 ; j++)
+				{
+					asprintf(&filename , "%s/%dL%02d" , dirName , now , j);
+					tempCipher = cc.Encrypt(sk , decLocation[j]);
+					lbcrypto::Serial::SerializeToFile(filename , tempCipher , lbcrypto::SerType::BINARY);
+				}
+			}
+			return true;
+		} , i));		
+	}
+
+	for(int i = 0 ; i < thread ; i++)
+	{
+		threads[i].get();
+	}
+
+	system("zip -r cts cts");
+	system("rm -f -R cts");
+
+	return 0;
 }
