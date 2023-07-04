@@ -22,22 +22,22 @@ int DataBase::fetch()
 		dataCipher_ temp;
 		for(int j = 0 ; j < 40 ; j++)
 		{
-			asprintf(&fileName , "encData/%dN%02d" , i , j);
+			asprintf(&fileName , "%s/%dN%02d" , __dirName.c_str() , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.nameCipher[j / 5][j % 5] , lbcrypto::SerType::BINARY);
 		}
 		for(int j = 0 ; j < 3 ; j++)
 		{
-			asprintf(&fileName , "encData/%dC%02d" , i , j);
+			asprintf(&fileName , "%s/%dC%02d" , __dirName.c_str() , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.caseCipher[j] , lbcrypto::SerType::BINARY);
 		}	
 		for(int j = 0 ; j < 13 ; j++)
 		{
-			asprintf(&fileName , "encData/%dT%02d" , i , j);
+			asprintf(&fileName , "%s/%dT%02d" , __dirName.c_str() , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.timeCipher[j] , lbcrypto::SerType::BINARY);
 		}
 		for(int j = 0 ; j < 8 ; j++)
 		{
-			asprintf(&fileName , "encData/%dL%02d" , i , j);
+			asprintf(&fileName , "%s/%dL%02d" , __dirName.c_str() , i , j);
 			lbcrypto::Serial::DeserializeFromFile(fileName , temp.locationCipher[j] , lbcrypto::SerType::BINARY);
 		}
 		__dataCipher.push_back(temp);
