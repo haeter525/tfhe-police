@@ -325,14 +325,17 @@ int decrypt(const char* dirName)
 
 int add()
 {
-	int length = 0;
-	FILE* fptr = fopen("encData/length" , "r");
-	fscanf(fptr , "%d" , &length);
-	fclose(fptr);
 	system("unzip cts.zip");
 	int add = 0;
-	fptr = fopen("cts/length" , "r");
+	FILE* fptr = fopen("cts/length" , "r");
 	fscanf(fptr , "%d" , &add);
+	fclose(fptr);
+
+	int length = 0;
+	fptr = fopen("encData/length" , "r+");
+	fscanf(fptr , "%d" , &length);
+	fseek(fptr , 0 , SEEK_SET);
+	fprintf(fptr , "%d" , length + add);
 	fclose(fptr);
 	char* command;
 	
