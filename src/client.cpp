@@ -11,7 +11,8 @@ int main(int argc , char* argv[])
 		{"keygen" , 0 , NULL , 'k'} , 
 		{"name" , 1 , NULL , 'n'} , 
 		{"decrypt" , 1 , NULL , 'd'} , 
-        {"encrypt" , 1 , NULL , 'e'}
+        {"encrypt" , 1 , NULL , 'e'} , 
+		{"add" , 0 , NULL , 'a'}
 	};
 	while((c = getopt_long(argc , argv , "hn:d:ke:" , opt , NULL)) != -1)
 	{
@@ -31,6 +32,9 @@ int main(int argc , char* argv[])
 				break;
             case 'e':
 				encrypt(optarg);
+				break;
+			case 'a':
+				addData();
 				break;
 			case '?':
 				std::cout << "unknown argument.\n";
