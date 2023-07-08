@@ -39,7 +39,7 @@ int main(int argc , char* argv[])
 				encrypt(optarg);
 				break;
 			case 'a':
-				encrypt("cts");
+				encrypt("insert");
 				break;
 			case '?':
 				std::cout << "unknown argument.\n";
