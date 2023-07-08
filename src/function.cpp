@@ -38,6 +38,8 @@ void decryptCount() {
 
     char* filename;
 
+    system("unzip countResult -d countResult");
+
     puts("start decrypting...");
 
     for (int bit = 0; bit < 10 ; bit++) {
@@ -48,15 +50,13 @@ void decryptCount() {
 
         cc.Decrypt(sk, countCipher[bit], &countPlain[bit]);
 
-        std::cout << countPlain[bit] <<"";
-
         sum += (power * countPlain[bit]);
 
         power = power * 2;
 
     }
 
-    std::cout << "\nthe count result (decimal) is : " << sum << std::endl;
+    std::cout << "the count result (decimal) is : " << sum << std::endl;
 
 
 }
@@ -154,6 +154,8 @@ int counter(){
 
         lbcrypto::Serial::SerializeToFile(filename, count[bit], lbcrypto::SerType::BINARY);
     }
+
+    system("zip -r countResult countResult");
 
     return 0;
 }
