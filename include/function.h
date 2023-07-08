@@ -7,12 +7,18 @@ struct nameCipher {
 	lbcrypto::LWECiphertext nc[8][5];
 };
 
+/* server */
 int fetchName(nameCipher* myCipher);
-int encryptName (char *name);
+int counter();
+void *eval(void *);/* thread of counter called by counter() */
 int query();
+
+/* client */
 int keygen();
 int encrypt(const char* dirName);
 int decrypt(const char* dirName);
+int encryptName (char *name);
+void decryptCount();
 int add();
 
 #endif

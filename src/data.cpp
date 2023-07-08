@@ -1,6 +1,7 @@
 #include "data.h"
 #include "encode.h"
 #include <future>
+#include <pthread.h>
 #include "str_cmp.h"
 
 #define DEBUG 0

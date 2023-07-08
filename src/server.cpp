@@ -2,6 +2,8 @@
 #include <getopt.h>
 #include "function.h"
 
+using namespace lbcrypto;
+
 void help();
 
 int main(int argc , char* argv[])

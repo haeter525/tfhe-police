@@ -22,6 +22,182 @@
 
 #define DEBUG 0
 
+void decryptCount() {
+
+    lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
+
+    lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
+
+    lbcrypto::LWECiphertext countCipher[10];
+
+    lbcrypto::LWEPlaintext countPlain[10];
+
+    int sum   = 0;
+
+    int power = 1; /* 2^0 */
+
+    char* filename;
+
+    puts("start decrypting...");
+
+    for (int bit = 0; bit < 10 ; bit++) {
+
+        asprintf(&filename, "countResult/%d-count", bit);
+
+        lbcrypto::Serial::DeserializeFromFile(filename, countCipher[bit], lbcrypto::SerType::BINARY);
+
+        cc.Decrypt(sk, countCipher[bit], &countPlain[bit]);
+
+        std::cout << countPlain[bit] <<"";
+
+        sum += (power * countPlain[bit]);
+
+        power = power * 2;
+
+    }
+
+    std::cout << "\nthe count result (decimal) is : " << sum << std::endl;
+
+
+}
+
+
+int counter(){
+
+    DataBase mydb("encData");
+
+    nameCipher mycipher;
+
+    mydb.fetch();
+
+    fetchName(&mycipher);
+
+    lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
+
+    lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
+
+    cryptoContext.BTKeyGen(secretKey);
+
+    tempdata = mydb.get();
+
+    num = tempdata.size();
+
+    for(int i = 0;i <8 ;i++){
+
+        for(int j = 0;j < 5;j++)
+
+            qNameCipher[i][j] = mycipher.nc[i][j];
+    }
+
+    blockSize = (num - 1) / numThreads + 1;
+
+    /* initialize the count as 0 in ciphertext */
+    for (int i = 0;i < 10; i++ ) {
+
+        count[i] = cryptoContext.Encrypt(secretKey, 0);
+
+    }
+
+    system("mkdir countResult");
+
+    puts("start multi-processing...");
+
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+
+        printf("\n mutex init has failed\n");
+
+        return 1;
+    }
+
+    int *tinfo = dataIdx;
+
+    int i = 0;
+
+    int error;
+
+    while (i < numThreads) {
+
+        error = pthread_create(&(tid[i]),
+                               NULL,
+                               &eval, (void*)&tinfo[i]);
+        if (error != 0)
+
+            printf("\nThread can't be created :[%s]",
+
+                   strerror(error));
+
+        i++;
+
+    }
+
+
+    for (int t = 0; t < numThreads; t++) {
+
+        if (pthread_join(tid[t], NULL) != 0) {
+
+            perror("pthread_join() error");
+
+            exit(3);
+
+        }
+    }
+    pthread_mutex_destroy(&lock);
+
+    puts("serializing count to file... ");
+
+    char* filename;
+
+    for (int bit = 0; bit < 10; bit++) {
+
+        asprintf(&filename, "countResult/%d-count", bit);
+
+        lbcrypto::Serial::SerializeToFile(filename, count[bit], lbcrypto::SerType::BINARY);
+    }
+
+    return 0;
+}
+
+void *eval(void *arg) {
+
+    int *data = (int *) arg;
+
+    printf("thread %d is running\n", data[0]);
+
+    for (int b = 0; b < blockSize; b++) {
+
+        if (b + data[0] * blockSize >= num) {
+            break;
+        }
+
+        /* cmpResult is 0 or 1 in ciphertext */
+        auto cmpResult = str_comp(tempdata[b + data[0] * blockSize].nameCipher, qNameCipher, secretKey, cryptoContext);
+
+        /* the count is shared variable so we have to synchronize the threads */
+        pthread_mutex_lock(&lock);
+
+        auto carry = cmpResult;
+
+        for (int bit = 0; bit < 10; bit++) {
+
+            auto res = cryptoContext.EvalBinGate(XOR, count[bit], carry);
+
+            carry = cryptoContext.EvalBinGate(AND, count[bit], carry);
+
+            count[bit] = res;
+
+        }
+
+        pthread_mutex_unlock(&lock);
+
+        printf("thread %d finished\n", data[0]);
+
+
+    }
+    return NULL;
+}
+
+
 
 
 int encryptName(char* name)
