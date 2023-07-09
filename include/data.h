@@ -20,23 +20,6 @@ struct dataCipher_
 	lbcrypto::LWECiphertext timeCipher[13];
 };
 
-lbcrypto::LWECiphertext count[10];
-
-pthread_t tid[8];
-pthread_mutex_t lock;
-int numThreads = 8;
-int dataIdx[8] = {0,1,2,3,4,5,6,7}; /* assigned to counter threads */
-int blockSize;
-int num;/*data size */
-
-std::vector <dataCipher_> tempdata;
-lbcrypto::LWEPrivateKey secretKey;
-lbcrypto::BinFHEContext cryptoContext;
-lbcrypto::LWEPrivateKey sk;
-lbcrypto::BinFHEContext cc;
-lbcrypto::LWECiphertext qNameCipher[8][5];
-
-
 
 class DataBase
 {
