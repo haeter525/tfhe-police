@@ -12,7 +12,7 @@ int main(int argc , char* argv[])
 	option opt[] = 
 	{
 		{"help" , 0 , NULL , 'h'} , 
-		{"count" , 0 , NULL , 'c'} , 
+		{"counter" , 0 , NULL , 'c'} ,
 		{"qeury" , 0 , NULL , 'q'} , 
 		{"add" , 0 , NULL , 'a'}
 	};
@@ -24,7 +24,7 @@ int main(int argc , char* argv[])
 				help();
 				break;
 			case 'c':
-                //count()
+                counter();
                 break;
             case 'q':
                 query();

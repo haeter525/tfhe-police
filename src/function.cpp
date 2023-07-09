@@ -22,24 +22,34 @@
 
 lbcrypto::LWECiphertext count[10];
 
-pthread_t tid[8];
-pthread_mutex_t lock;
 int numThreads = 8;
-int dataIdx[8] = {0,1,2,3,4,5,6,7}; /* assigned to counter threads */
+
+pthread_mutex_t lock;
+
+/* assigned to counter threads */
+int dataIdx[8] = {0,1,2,3,4,5,6,7};
+
 int blockSize;
-int num;/*data size */
+
+/*data size */
+int num;
 
 std::vector <dataCipher_> tempdata;
-lbcrypto::LWEPrivateKey secretKey;
-lbcrypto::BinFHEContext cryptoContext;
-lbcrypto::LWEPrivateKey sk;
-lbcrypto::BinFHEContext cc;
+
 lbcrypto::LWECiphertext qNameCipher[8][5];
+
+lbcrypto::LWEPrivateKey secretKey;
+
+lbcrypto::BinFHEContext cryptoContext;
 
 
 #define DEBUG 0
 
 void decryptCount() {
+
+    lbcrypto::LWEPrivateKey sk;
+
+    lbcrypto::BinFHEContext cc;
 
     lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
 
@@ -55,7 +65,7 @@ void decryptCount() {
 
     char* filename;
 
-    system("unzip countResult -d countResult");
+    system("unzip countResult");
 
     puts("start decrypting...");
 
@@ -133,6 +143,8 @@ int counter(){
 
     int error;
 
+    pthread_t tid[8];
+
     while (i < numThreads) {
 
         error = pthread_create(&(tid[i]),
@@ -174,6 +186,8 @@ int counter(){
 
     system("zip -r countResult countResult");
 
+    system("rm -rf countResult");
+
     return 0;
 }
 
@@ -193,6 +207,7 @@ void *eval(void *arg) {
         auto cmpResult = str_comp(tempdata[b + data[0] * blockSize].nameCipher, qNameCipher, secretKey, cryptoContext);
 
         /* the count is shared variable so we have to synchronize the threads */
+
         pthread_mutex_lock(&lock);
 
         auto carry = cmpResult;
@@ -603,7 +618,7 @@ int encrypt(const char* dirName)
 
 	}
 
-	for(int i = 0 , c = 0 ; (c = fgetc(fptr)) != EOF ; i++)
+	for (int c = 0 ; (c = fgetc(fptr)) != EOF ; )
 
 	{
 

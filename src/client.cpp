@@ -15,11 +15,12 @@ int main(int argc , char* argv[])
 		{"help" , 0 , NULL , 'h'} , 
 		{"keygen" , 0 , NULL , 'k'} , 
 		{"name" , 1 , NULL , 'n'} , 
-		{"decrypt" , 1 , NULL , 'd'} , 
+		{"decrypt" , 1 , NULL , 'd'} ,
+        {"decryptCount" , 0 , NULL , 'c'} ,
         {"encrypt" , 1 , NULL , 'e'} , 
 		{"add" , 0 , NULL , 'a'}
 	};
-	while((c = getopt_long(argc , argv , "hn:d:ke:a" , opt , NULL)) != -1)
+	while((c = getopt_long(argc , argv , "hn:d:kce:a" , opt , NULL)) != -1)
 	{
 		switch(c)
 		{
@@ -35,6 +36,9 @@ int main(int argc , char* argv[])
 			case 'd':
 				decrypt(optarg);
 				break;
+            case 'c':
+                decryptCount();
+                break;
             case 'e':
 				encrypt(optarg);
 				break;

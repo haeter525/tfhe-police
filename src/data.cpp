@@ -13,7 +13,15 @@ DataBase::DataBase(const char* dirName)
 
 int DataBase::fetch()
 {
-	char* fileName = NULL;
+
+    char *unzip;
+
+    asprintf(&unzip, "unzip %s", __dirName.c_str());
+
+    system(unzip);
+
+    char *fileName = NULL;
+
 	asprintf(&fileName , "%s/length" , __dirName.c_str());
 	FILE* fptr = fopen(fileName , "r");
 	int length = 0;
