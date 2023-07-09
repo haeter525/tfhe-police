@@ -1033,11 +1033,11 @@ int add()
 
 {
 
-	system("unzip cts.zip");
+	system("unzip insert.zip");
 
 	int add = 0;
 
-	FILE* fptr = fopen("cts/length" , "r");
+	FILE* fptr = fopen("insert/length" , "r");
 
 	fscanf(fptr , "%d" , &add);
 
@@ -1069,7 +1069,7 @@ int add()
 
 		{
 
-			asprintf(&command , "cp cts/%dN%02d encData/%dN%02d" , i , j , length + i , j);
+			asprintf(&command , "cp insert/%dN%02d encData/%dN%02d" , i , j , length + i , j);
 
 			system(command);
 
@@ -1079,7 +1079,7 @@ int add()
 
 		{
 
-			asprintf(&command , "cp cts/%dC%02d encData/%dC%02d" , i , j , length + i , j);
+			asprintf(&command , "cp insert/%dC%02d encData/%dC%02d" , i , j , length + i , j);
 
 			system(command);
 
@@ -1089,7 +1089,7 @@ int add()
 
 		{
 
-			asprintf(&command , "cp cts/%dT%02d encData/%dT%02d" , i , j , length + i , j);
+			asprintf(&command , "cp insert/%dT%02d encData/%dT%02d" , i , j , length + i , j);
 
 			system(command);
 
@@ -1099,7 +1099,7 @@ int add()
 
 		{
 
-			asprintf(&command , "cp cts/%dL%02d encData/%dL%02d" , i , j , length + i , j);
+			asprintf(&command , "cp insert/%dL%02d encData/%dL%02d" , i , j , length + i , j);
 
 			system(command);
 
