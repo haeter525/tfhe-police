@@ -428,7 +428,15 @@ int query(){
 
 		system("mkdir evalData");
 
-	  	
+	  	char* temp;
+
+		asprintf(&temp , "evalData/length");
+
+		FILE* fptr = fopen(temp , "wb");
+
+		fprintf(fptr , "%d" , num);
+
+		fclose(fptr);
 
 
 
@@ -470,7 +478,8 @@ int query(){
 
 			
 
-										asprintf(&filename , "evalData/%d-name-%d-%d" ,b + row * blockSize, byte, bit);
+										asprintf(&filename , "evalData/%dN%02d" , b + row * blockSize , byte * 5 + bit);
+										
 
 										lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
 
@@ -488,7 +497,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-case-%d" , b + row * blockSize, bit);
+								asprintf(&filename , "evalData/%dC%02d" , b + row * blockSize , bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
 
@@ -504,7 +513,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-location-%d" , b + row * blockSize, bit);
+								asprintf(&filename , "evalData/%dL%02d" , b + row * blockSize , bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
@@ -520,7 +529,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-time-%d" ,b + row * blockSize, bit);
+								asprintf(&filename , "evalData/%dT%02d" , b + row * blockSize , bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
