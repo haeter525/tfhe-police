@@ -362,7 +362,7 @@ int query(){
 
 	fetchName(&mycipher);
 
-	char* filename; 
+	char* filename;
 
 
 	lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
