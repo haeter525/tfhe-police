@@ -438,8 +438,26 @@ int query(){
 
 		fclose(fptr);
 
+<<<<<<< HEAD
 
 
+=======
+    	lbcrypto::LWECiphertext cmpResult;
+
+   	 puts("start querying....");	
+
+    	system("mkdir queryData");
+    
+    	char* temp;
+
+	asprintf(&temp , "queryData/length");
+
+	FILE* fptr = fopen(temp , "wb");
+
+	fprintf(fptr , "%d" , num);
+
+	fclose(fptr);
+>>>>>>> 9827006 (refix query function)
 
 
 	for(int row = 0 ; row < thread ; row++)
@@ -476,10 +494,16 @@ int query(){
 
 						tempNameCipher[b + row * blockSize][byte][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].nameCipher[byte][bit]);
 
+<<<<<<< HEAD
 			
 
 										asprintf(&filename , "evalData/%dN%02d" , b + row * blockSize , byte * 5 + bit);
 										
+=======
+                        			asprintf(&filename , "queryData/%dN%02d" , b + row * blockSize , byte * 5 + bit);
+
+                       				lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
+>>>>>>> 9827006 (refix query function)
 
 										lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
 
@@ -497,7 +521,11 @@ int query(){
 
 		
 
+<<<<<<< HEAD
 								asprintf(&filename , "evalData/%dC%02d" , b + row * blockSize , bit);
+=======
+								asprintf(&filename , "queryData/%dC%02d" , b + row * blockSize , bit);
+>>>>>>> 9827006 (refix query function)
 
 								lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
 
@@ -513,7 +541,11 @@ int query(){
 
 		
 
+<<<<<<< HEAD
 								asprintf(&filename , "evalData/%dL%02d" , b + row * blockSize , bit);
+=======
+								asprintf(&filename , "queryData/%dL%02d" , b + row * blockSize , bit);
+>>>>>>> 9827006 (refix query function)
 
 								lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
@@ -529,7 +561,11 @@ int query(){
 
 		
 
+<<<<<<< HEAD
 								asprintf(&filename , "evalData/%dT%02d" , b + row * blockSize , bit);
+=======
+								asprintf(&filename , "queryData/%dT%02d" , b + row * blockSize , bit);
+>>>>>>> 9827006 (refix query function)
 
 								lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
