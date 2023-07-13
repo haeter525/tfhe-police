@@ -354,8 +354,6 @@ int fetchName(nameCipher* myCipher){
 
 int query(){
 
-		
-
 	DataBase mydb("encData");
 
 	nameCipher mycipher;
@@ -366,11 +364,6 @@ int query(){
 
 	char* filename; 
 
-	
-
-	lbcrypto::LWEPrivateKey secretKey;
-
-		lbcrypto::BinFHEContext cryptoContext;
 
 	lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
 
@@ -378,11 +371,10 @@ int query(){
 
 	cryptoContext.BTKeyGen(secretKey);
 
-	
 
-	std::vector<dataCipher_> tempdata = mydb.get();
+	tempdata = mydb.get();
 
-	const int num = tempdata.size();
+	num = tempdata.size();
 
 	lbcrypto::LWECiphertext tempNameCipher[num][8][5];
 
@@ -392,8 +384,6 @@ int query(){
 
 	lbcrypto::LWECiphertext tempTimeCipher[num][13];
 
-	lbcrypto::LWECiphertext qNameCipher[8][5];
-
 	for(int i = 0;i <8 ;i++){
 
 		for(int j = 0;j < 5;j++)
@@ -402,36 +392,18 @@ int query(){
 
 	}
 
-	
-
-	
 
 	int thread = 8;
 
 	std::vector <std::future <bool>> threads;
 
-	int blockSize = (num - 1) / thread + 1;
+	blockSize = (num - 1) / thread + 1;
 
-		lbcrypto::LWECiphertext cmpResult;
+    lbcrypto::LWECiphertext cmpResult;
 
-		lbcrypto::LWECiphertext count;
+    puts("start querying....");
 
-	
-
-	
-
-	
-
-		puts("start string comparing....");
-
-		system("mkdir cmpResults");
-
-		system("mkdir evalData");
-
-	  	
-
-
-
+    system("mkdir queryData");
 
 
 	for(int row = 0 ; row < thread ; row++)
@@ -452,12 +424,6 @@ int query(){
 
 				auto cmpResult = str_comp(tempdata[b + row * blockSize].nameCipher , qNameCipher , secretKey , cryptoContext);
 
-			
-
-						asprintf(&filename , "cmpResults/%d-cmpResult" , b + row * blockSize);
-
-						lbcrypto::Serial::SerializeToFile(filename , cmpResult , lbcrypto::SerType::BINARY);
-
 				for(int byte = 0 ; byte < 8 ; byte++)	
 
 				{
@@ -468,13 +434,10 @@ int query(){
 
 						tempNameCipher[b + row * blockSize][byte][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].nameCipher[byte][bit]);
 
-			
+                        asprintf(&filename , "queryData/%d-name-%d-%d" ,b + row * blockSize, byte, bit);
 
-										asprintf(&filename , "evalData/%d-name-%d-%d" ,b + row * blockSize, byte, bit);
+                        lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
 
-										lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
-
-						
 
 					}
 
@@ -488,7 +451,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-case-%d" , b + row * blockSize, bit);
+								asprintf(&filename , "queryData/%d-case-%d" , b + row * blockSize, bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
 
@@ -504,7 +467,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-location-%d" , b + row * blockSize, bit);
+								asprintf(&filename , "queryData/%d-location-%d" , b + row * blockSize, bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
@@ -520,7 +483,7 @@ int query(){
 
 		
 
-								asprintf(&filename , "evalData/%d-time-%d" ,b + row * blockSize, bit);
+								asprintf(&filename , "queryData/%d-time-%d" ,b + row * blockSize, bit);
 
 								lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 
@@ -543,6 +506,7 @@ int query(){
 				threads[row].get();
 
 		}
+
 
 	return 0;
 
@@ -700,7 +664,7 @@ int encrypt(const char* dirName)
 
 	std::vector <std::future <bool>> threads;
 
-	int blockSize = (data.size() - 1) / thread + 1;
+	blockSize = (data.size() - 1) / thread + 1;
 
 
 
@@ -861,46 +825,42 @@ int decrypt(const char* dirName)
 	lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
 
 	cc.BTKeyGen(sk);
-	
 
-	char* temp;
+	//char* temp;
 
-	asprintf(&temp , "unzip %s.zip" , dirName);
+	//asprintf(&temp , "unzip %s.zip" , dirName);
 
-	system(temp);
+	//system(temp);
 
 	//asprintf(&temp , "rm -f -R %s" , dirName);
 
 	//system(temp);
 
-	free(temp);
-
-	
+	//free(temp);
 
 	std::vector <data_> data;
-
-
 
 	FILE *fptr;
 
 	int c;
-	char* tempnum;
-	asprintf(&tempnum , "%s/length" , dirName);
-	fptr = fopen(tempnum , "r");
-	fscanf(fptr , "%d" , &c);
+
+    char* tempnum;
+
+    asprintf(&tempnum ,"%s/length" , "encData");
+
+    fptr = fopen(tempnum , "r");
+
+    fscanf(fptr , "%d" , &c);
 
 	fclose(fptr);
 
     fptr = fopen("Result.csv","w");
 
-
-
-	int thread = 16;
+	int thread = 8;
 
 	std::vector <std::future <bool>> threads;
 
-	int blockSize = (c - 1) / thread + 1;
-
+	blockSize = (c - 1) / thread + 1;
 
 	for(int i = 0 ; i < thread ; i++)
 
@@ -919,8 +879,6 @@ int decrypt(const char* dirName)
 			lbcrypto::LWECiphertext tempLocationCipher[8];
 
 			lbcrypto::LWECiphertext tempTimeCipher[13];
-
-
 
 			char* fileName = NULL;
 
