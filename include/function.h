@@ -10,7 +10,7 @@ struct nameCipher {
 /* server */
 int fetchName(nameCipher* myCipher);
 int counter();
-void *eval(void *);/* thread of counter called by counter() */
+void *eval(void *);/* thread of counter */
 int query();
 
 /* client */
