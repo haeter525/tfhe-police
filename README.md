@@ -1,4 +1,4 @@
-# tfhe-police
+# fhe-police
 
 The deault security strength is MEDIUM
 
