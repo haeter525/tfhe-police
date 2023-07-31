@@ -51,7 +51,7 @@ void decryptCount() {
 
     lbcrypto::BinFHEContext cc;
 
-    lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
+    lbcrypto::Serial::DeserializeFromFile("secretKey" , sk , lbcrypto::SerType::BINARY);
 
     lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
 
@@ -99,11 +99,15 @@ int counter(){
 
     fetchName(&mycipher);
 
-    lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
+    lbcrypto::LWEPublicKey publicKey;
+	lbcrypto::Serial::DeserializeFromFile("myKey" , publicKey , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
+	lbcrypto::RingGSWACCKey refreshKey;
+	lbcrypto::LWESwitchingKey ksKey;
+	lbcrypto::Serial::DeserializeFromFile("rfKey" , refreshKey , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("ksKey" , ksKey , lbcrypto::SerType::BINARY);
 
-    lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
-
-    cryptoContext.BTKeyGen(secretKey);
+	cryptoContext.BTKeyLoad({refreshKey , ksKey});
 
     tempdata = mydb.get();
 
@@ -121,7 +125,7 @@ int counter(){
     /* initialize the count as 0 in ciphertext */
     for (int i = 0;i < 10; i++ ) {
 
-        count[i] = cryptoContext.Encrypt(secretKey, 0);
+        count[i] = cryptoContext.Encrypt(publicKey, 0);
 
     }
 
@@ -195,6 +199,16 @@ void *eval(void *arg) {
 
     int *data = (int *) arg;
 
+	lbcrypto::LWEPublicKey publicKey;
+	lbcrypto::Serial::DeserializeFromFile("myKey" , publicKey , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
+	lbcrypto::RingGSWACCKey refreshKey;
+	lbcrypto::LWESwitchingKey ksKey;
+	lbcrypto::Serial::DeserializeFromFile("rfKey" , refreshKey , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("ksKey" , ksKey , lbcrypto::SerType::BINARY);
+
+	cryptoContext.BTKeyLoad({refreshKey , ksKey});
+
     printf("thread %d is running\n", data[0]);
 
     for (int b = 0; b < blockSize; b++) {
@@ -204,7 +218,7 @@ void *eval(void *arg) {
         }
 
         /* cmpResult is 0 or 1 in ciphertext */
-        auto cmpResult = str_comp(tempdata[b + data[0] * blockSize].nameCipher, qNameCipher, secretKey, cryptoContext);
+        auto cmpResult = str_comp(tempdata[b + data[0] * blockSize].nameCipher, qNameCipher, publicKey, cryptoContext);
 
         /* the count is shared variable so we have to synchronize the threads */
 
@@ -252,7 +266,7 @@ int encryptName(char* name)
 
 	lbcrypto::BinFHEContext CryptoContext;
 
-	if(lbcrypto::Serial::DeserializeFromFile(std::string("myKey") , SecretKey , lbcrypto::SerType::BINARY) == 0)
+	if(lbcrypto::Serial::DeserializeFromFile(std::string("secretKey") , SecretKey , lbcrypto::SerType::BINARY) == 0)
 
 	{
 
@@ -365,12 +379,16 @@ int query(){
 	char* filename;
 
 
-	lbcrypto::Serial::DeserializeFromFile("myKey" , secretKey , lbcrypto::SerType::BINARY);
-
+	lbcrypto::LWEPublicKey publicKey;
+	lbcrypto::Serial::DeserializeFromFile("myKey" , publicKey , lbcrypto::SerType::BINARY);
 	lbcrypto::Serial::DeserializeFromFile("CC" , cryptoContext , lbcrypto::SerType::BINARY);
+	lbcrypto::RingGSWACCKey refreshKey;
+	lbcrypto::LWESwitchingKey ksKey;
 
-	cryptoContext.BTKeyGen(secretKey);
+	lbcrypto::Serial::DeserializeFromFile("rfKey" , refreshKey , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("ksKey" , ksKey , lbcrypto::SerType::BINARY);
 
+	cryptoContext.BTKeyLoad({refreshKey , ksKey});
 
 	tempdata = mydb.get();
 
@@ -398,15 +416,10 @@ int query(){
 	std::vector <std::future <bool>> threads;
 
 	blockSize = (num - 1) / thread + 1;
-
-    	lbcrypto::LWECiphertext cmpResult;
-
-   	 puts("start querying....");	
-
-    	system("mkdir queryData");
-    
-    	char* temp;
-
+	lbcrypto::LWECiphertext cmpResult;
+	puts("start querying....");	
+   	system("mkdir queryData");
+   	char* temp;
 	asprintf(&temp , "queryData/length");
 
 	FILE* fptr = fopen(temp , "wb");
@@ -416,97 +429,52 @@ int query(){
 	fclose(fptr);
 
 
-	for(int row = 0 ; row < thread ; row++)
-
+	for(int row = 0 ; row < thread ; row++)	
 	{
-
 		threads.push_back(std::async([&](int row) {
-
-			for(int b = 0 ; b < blockSize ; b++){
-
+			for(int b = 0 ; b < blockSize ; b++)
+			{
 				if(b + row * blockSize >= num)
-
 				{
-
 					break;
-
 				}
-
-				auto cmpResult = str_comp(tempdata[b + row * blockSize].nameCipher , qNameCipher , secretKey , cryptoContext);
-
+				auto cmpResult = str_comp(tempdata[b + row * blockSize].nameCipher , qNameCipher , publicKey , cryptoContext);
 				for(int byte = 0 ; byte < 8 ; byte++)	
-
 				{
 
 					for(int bit = 0 ; bit < 5 ; bit++)
-
 					{
-
 						tempNameCipher[b + row * blockSize][byte][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].nameCipher[byte][bit]);
-
-                        			asprintf(&filename , "queryData/%dN%02d" , b + row * blockSize , byte * 5 + bit);
-
-                       				lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
-
-
+                        asprintf(&filename , "queryData/%dN%02d" , b + row * blockSize , byte * 5 + bit);
+                       	lbcrypto::Serial::SerializeToFile(filename , tempNameCipher[b + row * blockSize][byte][bit] , lbcrypto::SerType::BINARY);
 					}
 
 				}
 
 				for(int bit = 0 ; bit < 3 ; bit++)
-
 				{
-
 					tempCaseCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].caseCipher[bit]);
-
-		
-
-								asprintf(&filename , "queryData/%dC%02d" , b + row * blockSize , bit);
-
-								lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
-
-				
-
+					asprintf(&filename , "queryData/%dC%02d" , b + row * blockSize , bit);
+					lbcrypto::Serial::SerializeToFile(filename , tempCaseCipher[b + row * blockSize][bit]  , lbcrypto::SerType::BINARY);
 				}
 
 				for(int bit = 0 ; bit < 8 ; bit++)
-
 				{
 
 					tempLocCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].locationCipher[bit]);
-
-		
-
-								asprintf(&filename , "queryData/%dL%02d" , b + row * blockSize , bit);
-
-								lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
-
-					
-
+					asprintf(&filename , "queryData/%dL%02d" , b + row * blockSize , bit);
+					lbcrypto::Serial::SerializeToFile(filename , tempLocCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 				}
 
 				for(int bit = 0 ; bit < 13 ; bit++)
-
 				{
-
 					tempTimeCipher[b + row * blockSize][bit] = cryptoContext.EvalBinGate(AND , cmpResult, tempdata[b + row * blockSize].timeCipher[bit]);
-
-		
-
-								asprintf(&filename , "queryData/%dT%02d" , b + row * blockSize , bit);
-
-								lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
-
-								
-
+					asprintf(&filename , "queryData/%dT%02d" , b + row * blockSize , bit);
+					lbcrypto::Serial::SerializeToFile(filename , tempTimeCipher[b + row * blockSize][bit] , lbcrypto::SerType::BINARY);
 				}
-
 			}
-
 			return true;
-
 		}, row));
-
 	}
 
 
@@ -535,27 +503,39 @@ int keygen()
 	CryptoContext.GenerateBinFHEContext(lbcrypto::MEDIUM);
 
 	auto SecretKey = CryptoContext.KeyGen();
+	CryptoContext.BTKeyGen(SecretKey , PUB_ENCRYPT);
+	auto PublicKey = CryptoContext.GetPublicKey();
 
 	std::cout << "Start saving the key...\n";
 
-	if(lbcrypto::Serial::SerializeToFile(std::string("myKey") , SecretKey , lbcrypto::SerType::BINARY) == 0)
-
+	if(lbcrypto::Serial::SerializeToFile(std::string("secretKey") , SecretKey , lbcrypto::SerType::BINARY) == 0)
 	{
-
-		std::cerr << "Error saving key.\n";
-
+		std::cerr << "Error saving secret key.\n";
 		return 1;
-
 	}
 
 	if(lbcrypto::Serial::SerializeToFile(std::string("CC") , CryptoContext , lbcrypto::SerType::BINARY) == 0)
-
 	{
-
 		std::cerr << "Error saving CC.\n";
-
 		return 2;
+	}
 
+	if(lbcrypto::Serial::SerializeToFile(std::string("myKey") , PublicKey , lbcrypto::SerType::BINARY) == 0)
+	{
+		std::cerr << "Error saving public key.\n";
+		return 3;
+	}
+
+	if(lbcrypto::Serial::SerializeToFile(std::string("rfKey") , CryptoContext.GetRefreshKey() , lbcrypto::SerType::BINARY) == 0)
+	{
+		std::cerr << "Error saving public key.\n";
+		return 3;
+	}
+
+	if(lbcrypto::Serial::SerializeToFile(std::string("ksKey") , CryptoContext.GetSwitchKey() , lbcrypto::SerType::BINARY) == 0)
+	{
+		std::cerr << "Error saving public key.\n";
+		return 3;
 	}
 
 	std::cout << "Completed.\n";
@@ -574,7 +554,7 @@ int encrypt(const char* dirName)
 
 	lbcrypto::BinFHEContext cc;
 
-	lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("secretKey" , sk , lbcrypto::SerType::BINARY);
 
 	lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
 
@@ -830,7 +810,7 @@ int decrypt(const char* dirName)
 
 	lbcrypto::BinFHEContext cc;
 
-	lbcrypto::Serial::DeserializeFromFile("myKey" , sk , lbcrypto::SerType::BINARY);
+	lbcrypto::Serial::DeserializeFromFile("secretKey" , sk , lbcrypto::SerType::BINARY);
 
 	lbcrypto::Serial::DeserializeFromFile("CC" , cc , lbcrypto::SerType::BINARY);
 

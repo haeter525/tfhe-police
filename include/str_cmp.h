@@ -3,9 +3,9 @@
 
 #include "binfhecontext.h"
 using namespace lbcrypto;
-LWECiphertext byte_comp(lbcrypto::LWECiphertext b1[8], lbcrypto::LWECiphertext b2[8], lbcrypto::ConstLWEPrivateKey sk, lbcrypto::BinFHEContext cc);
+LWECiphertext byte_comp(lbcrypto::LWECiphertext b1[8], lbcrypto::LWECiphertext b2[8], lbcrypto::ConstLWEPublicKey sk, lbcrypto::BinFHEContext cc);
 
-LWECiphertext str_comp(lbcrypto::LWECiphertext s1[8][5], lbcrypto::LWECiphertext s2[8][5], lbcrypto::ConstLWEPrivateKey sk, lbcrypto::BinFHEContext cc);
+LWECiphertext str_comp(lbcrypto::LWECiphertext s1[8][5], lbcrypto::LWECiphertext s2[8][5], lbcrypto::ConstLWEPublicKey sk, lbcrypto::BinFHEContext cc);
 
 
 #endif
