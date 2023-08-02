@@ -816,17 +816,13 @@ int decrypt(const char* dirName)
 
 	cc.BTKeyGen(sk);
 
-	//char* temp;
+	char* temp;
 
-	//asprintf(&temp , "unzip %s.zip" , dirName);
+	asprintf(&temp , "unzip %s.zip" , dirName);
 
-	//system(temp);
+	system(temp);
 
-	//asprintf(&temp , "rm -f -R %s" , dirName);
-
-	//system(temp);
-
-	//free(temp);
+	free(temp);
 
 	std::vector <data_> data;
 
@@ -836,7 +832,7 @@ int decrypt(const char* dirName)
 
     char* tempnum;
 
-    asprintf(&tempnum ,"%s/length" , "encData");
+    asprintf(&tempnum ,"%s/length" , dirName);
 
     fptr = fopen(tempnum , "r");
 
