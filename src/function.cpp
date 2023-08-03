@@ -238,11 +238,13 @@ void *eval(void *arg) {
 
         pthread_mutex_unlock(&lock);
 
-        printf("thread %d finished\n", data[0]);
-
 
     }
-    return NULL;
+        
+       printf("thread %d finished\n", data[0]);
+    
+
+       return NULL;
 }
 
 
