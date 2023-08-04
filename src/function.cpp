@@ -254,7 +254,7 @@ int encryptName(char* name)
 
 {
 
-	char temp[8] = {0};
+	char temp[9] = {'\0'};
 
 	strncpy(temp , name , 8);
 
@@ -698,7 +698,7 @@ int encrypt(const char* dirName)
 
 			{
 
-				int now = b + i * blockSize;
+				unsigned long int now = b + i * blockSize;
 
 				if(now >= data.size())
 
@@ -714,7 +714,7 @@ int encrypt(const char* dirName)
 
 				{
 
-					asprintf(&fileName , "%s/%dN%02d" , dirName , now , j);
+					asprintf(&fileName , "%s/%ldN%02d" , dirName , now , j);
 
 					tempCipher = cc.Encrypt(sk , decName[j]);
 
@@ -728,7 +728,7 @@ int encrypt(const char* dirName)
 
 				{
 
-					asprintf(&fileName , "%s/%dC%02d" , dirName , now , j);
+					asprintf(&fileName , "%s/%ldC%02d" , dirName , now , j);
 
 					tempCipher = cc.Encrypt(sk , decCase[j]);
 
@@ -742,7 +742,7 @@ int encrypt(const char* dirName)
 
 				{
 
-					asprintf(&fileName , "%s/%dT%02d" , dirName , now , j);
+					asprintf(&fileName , "%s/%ldT%02d" , dirName , now , j);
 
 					tempCipher = cc.Encrypt(sk , decTime[j]);
 
@@ -756,7 +756,7 @@ int encrypt(const char* dirName)
 
 				{
 
-					asprintf(&fileName , "%s/%dL%02d" , dirName , now , j);
+					asprintf(&fileName , "%s/%ldL%02d" , dirName , now , j);
 
 					tempCipher = cc.Encrypt(sk , decLocation[j]);
 

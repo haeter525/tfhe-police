@@ -14,11 +14,11 @@ DataBase::DataBase(const char* dirName)
 int DataBase::fetch()
 {
 
-    char *unzip;
+    // char *unzip;
 
-    asprintf(&unzip, "unzip %s", __dirName.c_str());
+    // asprintf(&unzip, "unzip %s", __dirName.c_str());
 
-    system(unzip);
+    // system(unzip);
 
     char *fileName = NULL;
 
