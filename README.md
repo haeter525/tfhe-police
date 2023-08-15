@@ -26,7 +26,7 @@ make
 ```
 
 
-## Notation
+## Related settings
 The deault security strength is MEDIUM
 
 The deault thread number is 8
