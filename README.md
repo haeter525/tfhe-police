@@ -4,7 +4,7 @@ step 1:
 Build and install OpenFHE using “make install”.
 
 step 2: 
-Create the build directory and cd to it.
+Create the build directory from the root directory of the this repo, and cd to it.
 ```
 mkdir build
 cd build
