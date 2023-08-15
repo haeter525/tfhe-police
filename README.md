@@ -1,15 +1,25 @@
 # fhe-police
 ## How to compile
-step 1:
+step 1: 
 Build and install OpenFHE using “make install”.
 
-step 2:
-Copy CMakeLists.User.txt from the OpenFHE root directory of the git repo to the folder for your project.
+step 2: 
+Create the build directory and cd to it.
+```
+mkdir build
+cd build
+```
+step 3: 
+Run
+```
+cmake ..
+```
 
-step 3:
-Rename CMakeLists.User.txt to CMakeLists.txt.
-
-step 4:
+step 4: 
+Run “make” to build the executable.
+```
+make
+```
 
 
 ## Notation
