@@ -1,5 +1,8 @@
 # fhe-police
+## How to compile
 
+
+## Notation
 The deault security strength is MEDIUM
 
 The deault thread number is 8
