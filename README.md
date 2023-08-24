@@ -1,4 +1,7 @@
 # fhe-police
+## Scene
+This repository aims to simulate the application of fully homomorphic encryption (FHE) technique on crime database. We will demonstrate how to use FHE technique to perform various database operations without decrypting the crime data, such as counting the number of crimes or querying specific crime data based on encrypted names.
+
 ## How to compile
 step 1: 
 Build and install OpenFHE using “make install”. If you don't know how to do it, please check
