@@ -30,7 +30,7 @@ make
 ```
 
 ### method 2
-You can compile with run.sh:
+You can compile with run.sh:  
 step 1: 
 Build and install OpenFHE using “make install”. If you don't know how to do it, please check
 [OpenFHE documentation](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/linux.html).  
