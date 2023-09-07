@@ -45,10 +45,11 @@ cd tfhe-rs
 ```
 
 step 4:  
-Run "run.sh". If your shell is not bash shell, please use your own shell to run the file.
+Run "run.sh". 
 ```
 bash run.sh
 ```
+If your shell is not bash shell, please use your own shell to run the file. Otherwise, please check if there is executable file "clang" and "clang++" in /usr/bin. If your executable file about clang is not named "clang" or "clang++", please modify "run.sh" to make the file name correspond to your clang file.
 
 step 5:  
 Change to build directory.
