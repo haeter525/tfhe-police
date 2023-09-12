@@ -84,6 +84,8 @@ jobs:
       - if: matrix.language == 'cpp'
         name: Build the criminal data cloud computing application
         run: |
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
           cd ${{ github.workspace }}
           mkdir build && cd build
           cmake ..
